@@ -5,17 +5,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import bgu.spl181.net.srv.bidi.ConnectionHandler;
 
 public abstract class User {
-	ConnectionHandler<String> Handler;
 	String UserName;
 	String DataBlock;
 	String Password;
 	
 
-	public User(ConnectionHandler<String> handler, String dataBlock, String UserName, String Password) {
-		this.Handler =handler;
+	public User(String userName,String password, String dataBlock) {
 		this.DataBlock=dataBlock;
-		this.UserName=UserName;
-		this.Password=Password;
+		this.UserName=userName;
+		this.Password=password;
 	}
 	
 	public String getUserName() {

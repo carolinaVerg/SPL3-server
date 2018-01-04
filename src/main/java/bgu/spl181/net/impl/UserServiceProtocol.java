@@ -11,7 +11,8 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 
 	private ConnectionsImpl<T> connections;
 	private int connectionId;
-	private boolean shouldTerminate = false;
+	private AtomicBoolean shouldTerminate = new AtomicBoolean(false);
+	private User user;
 	AtomicBoolean isLogin= new AtomicBoolean(false);
 
 	@Override
@@ -22,7 +23,7 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 
 	@Override
 	public void process(T message) {
-		shouldTerminate = "/n".equals(message);
+		shouldTerminate.set( "/n".equals(message));
 		String fullMsg = message.toString();
 		String commandType;
 		if (message.toString().indexOf(" ") == -1)
@@ -30,19 +31,11 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 		else
 			commandType = fullMsg.substring(0, fullMsg.indexOf(" ") - 1);
 
-		if (!shouldTerminate) {
+		if (!shouldTerminate.get()) {
 			switch (commandType) {
 			case "REGISTER": {
-				if (commandType == fullMsg) {
-					reply((T) "ERROR registration failed (no userName)");
-					return;
-				}
 				String LeftCommand = fullMsg.substring(commandType.length()+1);
 				String UserName = LeftCommand.substring(0, LeftCommand.indexOf(" ") - 1);
-				if (LeftCommand == UserName) {
-					reply((T) "ERROR registration failed (no password)");
-					return;
-				}
 				LeftCommand = LeftCommand.substring(UserName.length());
 				String Password;
 				String DataBlock="";
@@ -52,17 +45,17 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 					Password = LeftCommand.substring(0, LeftCommand.indexOf(" ")-1);
 					DataBlock = LeftCommand.substring(Password.length());
 					if(!this.ValidDataBlock(DataBlock)) {
-						reply((T) "ERROR registration failed (not valid dataBlock)");
+						this.ERROR(commandType);
 						return;	
 					}
 				}
 				if (UsersDataBase.getInstance().getLogin().containsKey(UserName)
 						| UsersDataBase.getInstance().getRegister().containsKey(UserName)) {
-					reply((T) "ERROR registration failed (user exists)");
+					this.ERROR(commandType);
 					return;
 				}
 				UsersDataBase.getInstance().addRegister(UserName, Password);
-				reply((T) "ACK registration succeeded");
+				this.ACK(commandType);
 			}
 				break;
 
@@ -70,57 +63,63 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 
 			case "LOGIN": {
 				if (commandType == fullMsg) {
-					reply((T) "ERROR login failed");
+					this.ERROR(commandType);
 					return;
 				}
 				String LeftCommand = fullMsg.substring(commandType.length());
 				String UserName = LeftCommand.substring(0, LeftCommand.indexOf(" ") - 1);
-				if (LeftCommand == UserName) {
-					reply((T) "ERROR login failed (no password)");
-					return;
-				}
 				LeftCommand = LeftCommand.substring(UserName.length());
 				String Password = LeftCommand;
 				if(this.isLogin.get()) {
-					reply((T) "ERROR login failed (client already logged in)");
+					this.ERROR(commandType);
 					return;	
 				}
 				if (UsersDataBase.getInstance().getLogin().containsKey(UserName)) {
-					reply((T) "ERROR login failed (username already logged in)");
+					this.ERROR(commandType);
 					return;
 				}
 				if (!UsersDataBase.getInstance().getRegister().containsKey(UserName)
 						| !UsersDataBase.getInstance().getRegister().contains(Password)) {
-					reply((T) "ERROR login failed (Wrong username or password)");
+					this.ERROR(commandType);
 					return;
 				}
 				if (UsersDataBase.getInstance().getRegister().get(UserName) != Password) {
-					reply((T) "ERROR login failed");
+					this.ERROR(commandType);
 					return;
 				}
 				UsersDataBase.getInstance().addLogin(UserName, Password);
 				this.isLogin.compareAndSet(false, true);
-				reply((T) "ACK login succeeded");
+				this.user=this.getUser(UserName, Password);
+				this.ACK(commandType);
 			}
 				break;
 
 			// ............................................................................................................
 			case "SIGNOUT": {
-				String msgToSend = "";
-				if (commandType != fullMsg)
-					msgToSend = fullMsg.substring(fullMsg.indexOf(" ") + 1);
-				reply((T) msgToSend);
-
+				if(!UsersDataBase.getInstance().getLogin().contains(user.getUserName())) {
+					this.ERROR(commandType);
+					return;
+				}
+				UsersDataBase.getInstance().removeLogin(user.getUserName());
+				this.ACK(commandType);
+				this.connections.disconnect(connectionId);
+				this.shouldTerminate.set(true);
 			}
 				break;
 
 			// ...................................................................................................
 			case "REQUEST": {
-				String msgToSend = "";
-				if (commandType != fullMsg)
-					msgToSend = fullMsg.substring(fullMsg.indexOf(" ") + 1);
-				reply((T) msgToSend);
-
+				if(!UsersDataBase.getInstance().getLogin().contains(user.getUserName())) {
+					this.ERROR(commandType);
+					return;
+				}
+				String LeftCommand = fullMsg.substring(commandType.length());
+				String RequestName = LeftCommand.substring(0, LeftCommand.indexOf(" ") - 1);
+				String Parameters="";
+				LeftCommand = LeftCommand.substring(RequestName.length());
+				if(LeftCommand.length()>0)
+					Parameters = LeftCommand.substring(1);
+				this.handelRequest(RequestName,Parameters);
 			}
 				break;
 
@@ -133,16 +132,24 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 
 	@Override
 	public boolean shouldTerminate() {
-		return shouldTerminate;
+		return shouldTerminate.get();
 	}
 
-	public abstract void handelRequest();
+	public abstract void handelRequest(String RequestName,String Parameters);
 
-	public abstract User creatUser(ConnectionHandler<T> connectionHandler, String dataBlock);
+	public abstract User getUser(String userName,String password);
+	
+	public void ACK(String commandType) {
+		this.connections.send(connectionId, (T) ("ACK" +commandType+ "succeeded"));
+	}
+	
+	public void ERROR(String commandType) {
+		this.connections.send(connectionId, (T) ("ERROR" +commandType+ "failed"));
+	}
 	
 
-	public void reply(T message) {
-		this.connections.send(connectionId, message);
+	public void BROADCAST(T message) {
+		// TODO
 	}
 	public abstract boolean ValidDataBlock(String DataBlock);
 	

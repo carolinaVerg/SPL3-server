@@ -1,5 +1,6 @@
 package bgu.spl181.net.impl;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -36,6 +37,12 @@ public class ConnectionsImpl<T> implements Connections<T> {
 
 	@Override
 	public void disconnect(int connectionId) {
+		try {
+			this.connectionMap.get(connectionId).close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		connectionMap.remove(connectionId);
 		
 	}

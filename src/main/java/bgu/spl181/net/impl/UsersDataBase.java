@@ -16,6 +16,10 @@ public  class UsersDataBase {
 	public synchronized void addLogin(String UserName, String Password) {
 		LoginMap.putIfAbsent(UserName, Password);
 	}
+	
+	public synchronized void removeLogin(String UserName) {
+		LoginMap.remove(UserName);
+	}
 	public synchronized void addRegister(String UserName, String Password) {
 		RegisterMap.putIfAbsent(UserName, Password);
 	}
