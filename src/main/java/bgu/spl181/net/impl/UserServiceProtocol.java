@@ -4,8 +4,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import bgu.spl181.net.api.bidi.BidiMessagingProtocol;
 import bgu.spl181.net.api.bidi.Connections;
-import bgu.spl181.net.srv.BlockingConnectionHandler;
-import bgu.spl181.net.srv.bidi.ConnectionHandler;
+
 
 public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T> {
 
@@ -45,17 +44,17 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 					Password = LeftCommand.substring(0, LeftCommand.indexOf(" ")-1);
 					DataBlock = LeftCommand.substring(Password.length());
 					if(!this.ValidDataBlock(DataBlock)) {
-						this.ERROR(commandType);
+						this.ERROR((T) (commandType+ "failed"));
 						return;	
 					}
 				}
 				if (UsersDataBase.getInstance().getLogin().containsKey(UserName)
 						| UsersDataBase.getInstance().getRegister().containsKey(UserName)) {
-					this.ERROR(commandType);
+					this.ERROR((T) (commandType+ "failed"));
 					return;
 				}
-				UsersDataBase.getInstance().addRegister(UserName, Password);
-				this.ACK(commandType);
+				this.addUser(UserName, Password, DataBlock);
+				this.ACK((T) (commandType+ "succeeded"));
 			}
 				break;
 
@@ -63,7 +62,7 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 
 			case "LOGIN": {
 				if (commandType == fullMsg) {
-					this.ERROR(commandType);
+					this.ERROR((T) (commandType+ "failed"));
 					return;
 				}
 				String LeftCommand = fullMsg.substring(commandType.length());
@@ -71,37 +70,37 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 				LeftCommand = LeftCommand.substring(UserName.length());
 				String Password = LeftCommand;
 				if(this.isLogin.get()) {
-					this.ERROR(commandType);
+					this.ERROR((T) (commandType+ "failed"));
 					return;	
 				}
 				if (UsersDataBase.getInstance().getLogin().containsKey(UserName)) {
-					this.ERROR(commandType);
+					this.ERROR((T) (commandType+ "failed"));
 					return;
 				}
 				if (!UsersDataBase.getInstance().getRegister().containsKey(UserName)
 						| !UsersDataBase.getInstance().getRegister().contains(Password)) {
-					this.ERROR(commandType);
+					this.ERROR((T) (commandType+ "failed"));
 					return;
 				}
 				if (UsersDataBase.getInstance().getRegister().get(UserName) != Password) {
-					this.ERROR(commandType);
+					this.ERROR((T) (commandType+ "failed"));
 					return;
 				}
 				UsersDataBase.getInstance().addLogin(UserName, Password);
 				this.isLogin.compareAndSet(false, true);
-				this.user=this.getUser(UserName, Password);
-				this.ACK(commandType);
+				this.user=UsersDataBase.getInstance().getUser(UserName);
+				this.ACK((T) (commandType+ "succeeded"));
 			}
 				break;
 
 			// ............................................................................................................
 			case "SIGNOUT": {
 				if(!UsersDataBase.getInstance().getLogin().contains(user.getUserName())) {
-					this.ERROR(commandType);
+					this.ERROR((T) commandType);
 					return;
 				}
 				UsersDataBase.getInstance().removeLogin(user.getUserName());
-				this.ACK(commandType);
+				this.ACK((T) (commandType+ "succeeded"));
 				this.connections.disconnect(connectionId);
 				this.shouldTerminate.set(true);
 			}
@@ -110,11 +109,11 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 			// ...................................................................................................
 			case "REQUEST": {
 				if(!UsersDataBase.getInstance().getLogin().contains(user.getUserName())) {
-					this.ERROR(commandType);
+					this.ERROR((T) (commandType+ "failed"));
 					return;
 				}
-				String LeftCommand = fullMsg.substring(commandType.length());
-				String RequestName = LeftCommand.substring(0, LeftCommand.indexOf(" ") - 1);
+				String LeftCommand = fullMsg.substring(commandType.length()+1);
+				String RequestName = LeftCommand.substring(0, LeftCommand.indexOf(" "));
 				String Parameters="";
 				LeftCommand = LeftCommand.substring(RequestName.length());
 				if(LeftCommand.length()>0)
@@ -137,19 +136,24 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 
 	public abstract void handelRequest(String RequestName,String Parameters);
 
-	public abstract User getUser(String userName,String password);
+	public abstract User addUser(String userName,String password, String dataBlock);
 	
-	public void ACK(String commandType) {
-		this.connections.send(connectionId, (T) ("ACK" +commandType+ "succeeded"));
+	public User userLogin() {
+		return this.user;
 	}
 	
-	public void ERROR(String commandType) {
-		this.connections.send(connectionId, (T) ("ERROR" +commandType+ "failed"));
+	public void ACK(T commandType) {
+		this.connections.send(connectionId, (T) ("ACK" +commandType));
+	}
+	
+	public void ERROR(T commandType) {
+		this.connections.send(connectionId, (T) ("ERROR" +commandType));
 	}
 	
 
 	public void BROADCAST(T message) {
-		// TODO
+		this.connections.setBroadCastList(UsersDataBase.getInstance().getLogedList());
+		this.connections.broadcast(message);
 	}
 	public abstract boolean ValidDataBlock(String DataBlock);
 	

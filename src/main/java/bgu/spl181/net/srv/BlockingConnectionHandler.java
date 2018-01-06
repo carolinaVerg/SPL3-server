@@ -25,13 +25,14 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
     private BufferedOutputStream out;
     private volatile boolean connected = true;
     private ConnectionsImpl<T> connectionsImpl;
+    private int connectionId=0;
     
 
-    public BlockingConnectionHandler(Socket sock, MessageEncoderDecoder<T> reader,BidiMessagingProtocol<T> protocol) {
+    public BlockingConnectionHandler(Socket sock, MessageEncoderDecoder<T> reader,BidiMessagingProtocol<T> protocol, ConnectionsImpl<T> connectionsImpl) {
         this.sock = sock;
         this.encdec = reader;
         this.protocol = protocol;
-        connectionsImpl= new ConnectionsImpl<T>();
+        this.connectionsImpl=connectionsImpl;
     }
 
     @Override
@@ -54,6 +55,10 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
         }
 
     }
+    
+    public BidiMessagingProtocol<T> getProtocol() {
+    	return this.protocol;
+    }
 
     @Override
     public void close() throws IOException {
@@ -73,5 +78,13 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
 			e.printStackTrace();
 		}
 		
+	}
+	
+	public int getConnectionId() {
+		return this.connectionId;
+	}
+	
+	public void setConnectionId(int Id) {
+		this.connectionId=Id;
 	}
 }

@@ -1,13 +1,10 @@
 package bgu.spl181.net.impl;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import bgu.spl181.net.srv.bidi.ConnectionHandler;
 
 public abstract class User {
-	String UserName;
-	String DataBlock;
-	String Password;
+	protected String UserName;
+	protected String DataBlock;
+	protected String Password;
 	
 
 	public User(String userName,String password, String dataBlock) {
