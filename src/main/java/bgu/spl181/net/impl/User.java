@@ -5,6 +5,8 @@ public abstract class User {
 	protected String UserName;
 	protected String DataBlock;
 	protected String Password;
+	private int check;
+	//TODO: CHNAGE
 	
 
 	public User(String userName,String password, String dataBlock) {
