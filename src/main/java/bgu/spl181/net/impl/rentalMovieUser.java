@@ -11,10 +11,10 @@ public class rentalMovieUser extends User{
 	
 	
 
-	public rentalMovieUser(String userName,String password, String dataBlock, boolean isAdmin) {
+	public rentalMovieUser(String userName,String password,String country, String dataBlock, boolean isAdmin) {
 		super(userName, password, dataBlock);
 		this.isAdmin=isAdmin;
-		this.Country=this.DataBlock.substring(this.DataBlock.indexOf("="));
+		this.Country=country;
 		this.MovieList= new LinkedList<Movie>();
 		this.Balance=0;
 	}
