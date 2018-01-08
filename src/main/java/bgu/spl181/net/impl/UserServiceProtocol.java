@@ -42,6 +42,7 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 	@Override
 	public void process(T message) {
 		shouldTerminate.set("/n".equals(message));
+		this.msgToArray((String) message);
 		String fullMsg = message.toString();
 		String commandType;
 		if (message.toString().indexOf(" ") == -1)

@@ -35,15 +35,21 @@ public class MovieDataBase {
 	}
 	
 	public synchronized static void  addMovie(Movie newMovie) {
-		if(!MovieMap.containsKey(newMovie.getName()))
+		if(!MovieMap.containsKey(newMovie.getName())) {
 			MovieMap.put(newMovie.getName(), newMovie);
+			if(!movies.contains(newMovie))
+				movies.add(newMovie);
+		}
+		
 		if(newMovie.getId()==highestId)
 			highestId=newMovie.getId()+1;
+		
 		
 	}
 	
 	public synchronized void removeMovie(Movie movie) {
 		MovieMap.remove(movie);
+		movies.remove(movie);
 		if(movie.getId()==highestId-1)
 			highestId--;
 		

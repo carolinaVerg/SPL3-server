@@ -52,6 +52,9 @@ public  class UsersDataBase {
 		if(!exists(user)) {
 			UsersMap.put(user.getUserName(), user);
 			RegisterMap.put(user.getUserName(), user.getPassword());
+			if(!users.contains(user))
+				users.add(user);
+			
 		}
 	}
 	public User getUser(String userName) {
