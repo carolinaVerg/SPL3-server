@@ -1,5 +1,6 @@
 package bgu.spl181.net.impl;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,7 +13,7 @@ public  class UsersDataBase {
 	private LinkedList<String>logedInList;
 	private static ConcurrentHashMap<String, User> UsersMap;
 	private static UsersDataBase Instance = new UsersDataBase();
-	private static List<User> users;
+	private static ArrayList<User> users;
 	
 	
 	private UsersDataBase() {
@@ -22,7 +23,7 @@ public  class UsersDataBase {
 		logedInList= new LinkedList<String>();
 	}
 
-	public List<User> getAllUsers(){
+	public ArrayList<User> getAllUsers(){
 		return users;
 	}
 	
@@ -68,9 +69,10 @@ public  class UsersDataBase {
 	}
 	
 	public static UsersDataBase getInstance() {
-		for(int i=0; i<users.size(); i++) {
+		if(users!=null)
+			for(int i=0; i<users.size(); i++) {
 				addUser(users.get(i));
-		}
+			}
 		return Instance;
 	}
 }

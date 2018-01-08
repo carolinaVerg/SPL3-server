@@ -1,13 +1,26 @@
 package bgu.spl181.net.impl;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Movie {
+import com.google.gson.annotations.SerializedName;
+
+public class Movie implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	@SerializedName("id")
 	private int id;
+	@SerializedName("name")
 	private String name;
+	@SerializedName("price")
 	private long price;
+	@SerializedName("bannedCountries")
 	private List<String> bannedCountries;
+	@SerializedName("availableAmount")
 	private int availableAmount;
+	@SerializedName("totalAmount")
 	private int totalAmount;
  
 	public Movie(int id,
@@ -61,5 +74,12 @@ public class Movie {
 	}
 	public void incAmount() {
 		this.availableAmount++;
+	}
+	
+	@Override
+	public String toString() {
+		return "id: "+this.id+", name: "+this.name+", price: "+this.price+", bannedCountries: "
+					+this.bannedCountries.toString()+", availableAmount: "+this.availableAmount+", totalAmount: "
+					+this.totalAmount;
 	}
 }

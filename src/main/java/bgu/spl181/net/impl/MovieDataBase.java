@@ -1,23 +1,39 @@
 package bgu.spl181.net.impl;
 
+import java.io.Serializable;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.google.gson.annotations.SerializedName;
+
 import bgu.spl181.net.srv.bidi.ConnectionHandler;
 
-public class MovieDataBase {
+public class MovieDataBase implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private static ConcurrentHashMap<String, Movie> MovieMap;
 	private static final MovieDataBase instance= new MovieDataBase();
 	private static int highestId=0;
-	private static List<Movie> movies;
+	//private static ArrayList<Movie> movies1;
+	@SerializedName("movies")
+	private ArrayList<Movie> movies;
+	
 	
 	private MovieDataBase() {
+		this.movies=new ArrayList<>();
 		MovieMap= new ConcurrentHashMap<>();
+		if(movies!=null)
+			for(int i=0; i<movies.size(); i++)
+				addMovie(movies.get(i));
 	}
 	
-	public List<Movie> getAllMovies() {
+	public ArrayList<Movie> getAllmovies1() {
 		return movies;
 	}
 	
@@ -34,7 +50,7 @@ public class MovieDataBase {
 		
 	}
 	
-	public synchronized static void  addMovie(Movie newMovie) {
+	public synchronized  void  addMovie(Movie newMovie) {
 		if(!MovieMap.containsKey(newMovie.getName())) {
 			MovieMap.put(newMovie.getName(), newMovie);
 			if(!movies.contains(newMovie))
@@ -60,8 +76,7 @@ public class MovieDataBase {
 	}
 	
 	public static MovieDataBase getInstance() {
-		for(int i=0; i<movies.size(); i++)
-			addMovie(movies.get(i));
 		return instance;
 	}
+	
 }
