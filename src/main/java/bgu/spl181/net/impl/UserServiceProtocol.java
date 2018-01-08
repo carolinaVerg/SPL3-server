@@ -13,6 +13,7 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 	private AtomicBoolean shouldTerminate = new AtomicBoolean(false);
 	private User user;
 	AtomicBoolean isLogin= new AtomicBoolean(false);
+	
 
 	@Override
 	public void start(int connectionId, Connections<T> connections) {
