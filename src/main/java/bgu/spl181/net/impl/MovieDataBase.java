@@ -8,16 +8,21 @@ import java.util.concurrent.ConcurrentHashMap;
 import bgu.spl181.net.srv.bidi.ConnectionHandler;
 
 public class MovieDataBase {
-	private ConcurrentHashMap<String, Movie> MovieMap;
+	private static ConcurrentHashMap<String, Movie> MovieMap;
 	private static final MovieDataBase instance= new MovieDataBase();
-	private int highestId=0;
+	private static int highestId=0;
+	private static List<Movie> movies;
 	
 	private MovieDataBase() {
-		this.MovieMap= new ConcurrentHashMap<>();
+		MovieMap= new ConcurrentHashMap<>();
+	}
+	
+	public List<Movie> getAllMovies() {
+		return movies;
 	}
 	
 	public Movie getMovie(String name) {
-		return this.MovieMap.get(name);
+		return MovieMap.get(name);
 	}
 	
 	public List<String> getMovieList(){
@@ -29,24 +34,28 @@ public class MovieDataBase {
 		
 	}
 	
-	public void addMovie(Movie newMovie) {
+	public synchronized static void  addMovie(Movie newMovie) {
 		if(!MovieMap.containsKey(newMovie.getName()))
-			this.MovieMap.put(newMovie.getName(), newMovie);
-		if(newMovie.getId()==this.highestId)
-			this.highestId=newMovie.getId()+1;
+			MovieMap.put(newMovie.getName(), newMovie);
+		if(newMovie.getId()==highestId)
+			highestId=newMovie.getId()+1;
+		
 	}
 	
-	public void removeMovie(Movie movie) {
-		this.MovieMap.remove(movie);
-		if(movie.getId()==this.highestId-1)
-			this.highestId--;
+	public synchronized void removeMovie(Movie movie) {
+		MovieMap.remove(movie);
+		if(movie.getId()==highestId-1)
+			highestId--;
+		
 	}
 	
 	public int getHighestId() {
-		return this.highestId;
+		return highestId;
 	}
 	
 	public static MovieDataBase getInstance() {
+		for(int i=0; i<movies.size(); i++)
+			addMovie(movies.get(i));
 		return instance;
 	}
 }
