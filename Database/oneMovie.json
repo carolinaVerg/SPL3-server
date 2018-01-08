@@ -1,0 +1,11 @@
+{
+      "id": "1",
+      "name": "The Godfather",
+      "price": "25",
+      "bannedCountries": [
+        "united kingdom",
+        "italy"
+      ],
+      "availableAmount": "1",
+      "totalAmount": "2"
+   }

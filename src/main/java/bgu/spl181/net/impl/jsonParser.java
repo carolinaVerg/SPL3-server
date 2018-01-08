@@ -13,6 +13,10 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
+
 
 public class jsonParser {
 
@@ -98,6 +102,29 @@ public class jsonParser {
 	}
 	
 	public static void main(String[] args) {
+		Movie[] mv=null;
+		//movieData movieData = null;
+		Movie movie=null;
+		Gson gson = new Gson();
+		try {
+			//movieData = gson.fromJson(new FileReader("Database/example_Movies.json"),movieData.class);
+			movie = gson.fromJson(new FileReader("Database/oneMovie.json"), Movie.class);
+		} catch (JsonSyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonIOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println(movie.getName());
+		//.out.println(movieData.getData()[0].getName());
 		//TODO
 	}
 }
+
+
+
+
