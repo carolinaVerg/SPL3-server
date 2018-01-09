@@ -1,5 +1,6 @@
 package bgu.spl181.net.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -7,13 +8,23 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.experimental.theories.Theories;
 
-public  class UsersDataBase {
+import com.google.gson.annotations.SerializedName;
+
+public  class UsersDataBase implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private static ConcurrentHashMap<String, String> RegisterMap;
 	private ConcurrentHashMap<String, String> LoginMap;
 	private LinkedList<String>logedInList;
 	private static ConcurrentHashMap<String, User> UsersMap;
 	private static UsersDataBase Instance = new UsersDataBase();
-	private static ArrayList<User> users;
+
+	//TODO: Fix sync between ArrayList and HashMap
+	
+	@SerializedName("users")
+	private ArrayList<rentalMovieUser> users;
 	
 	
 	private UsersDataBase() {
@@ -21,9 +32,14 @@ public  class UsersDataBase {
 		LoginMap= new ConcurrentHashMap<String, String>();	
 		UsersMap=new ConcurrentHashMap<String,User>();
 		logedInList= new LinkedList<String>();
+		users = new ArrayList<rentalMovieUser>();
+		if(users!=null)
+			for(int i=0; i<users.size(); i++) {
+				addUser(users.get(i));
+			}
 	}
 
-	public ArrayList<User> getAllUsers(){
+	public ArrayList<rentalMovieUser> getAllUsers(){
 		return users;
 	}
 	
@@ -49,13 +65,12 @@ public  class UsersDataBase {
 		return RegisterMap;
 	}
 	
-	public static void addUser(User user) {
+	
+	//TODO: Check
+	public void addUser(User user) {
 		if(!exists(user)) {
 			UsersMap.put(user.getUserName(), user);
 			RegisterMap.put(user.getUserName(), user.getPassword());
-			if(!users.contains(user))
-				users.add(user);
-			
 		}
 	}
 	public User getUser(String userName) {
@@ -69,10 +84,6 @@ public  class UsersDataBase {
 	}
 	
 	public static UsersDataBase getInstance() {
-		if(users!=null)
-			for(int i=0; i<users.size(); i++) {
-				addUser(users.get(i));
-			}
 		return Instance;
 	}
 }

@@ -50,7 +50,7 @@ public class MovieDataBase implements Serializable {
 		
 	}
 	
-	public synchronized  void  addMovie(Movie newMovie) {
+	public synchronized void  addMovie(Movie newMovie) {
 		if(!MovieMap.containsKey(newMovie.getName())) {
 			MovieMap.put(newMovie.getName(), newMovie);
 			if(!movies.contains(newMovie))

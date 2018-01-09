@@ -1,62 +1,81 @@
 package bgu.spl181.net.impl;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public class rentalMovieUser extends User{
+import com.google.gson.annotations.SerializedName;
+
+public class rentalMovieUser extends User implements Serializable{
+	
+	
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private boolean isAdmin=false;
-	private List<Movie> MovieList;
-	private String Country;
-	private long Balance;
+	@SerializedName("type")
+	private String type = "normal";
+	@SerializedName("movies")
+	private ArrayList<Movie> movies;
+	@SerializedName("country")
+	private String country;
+	@SerializedName("balance")
+	private long balance;
 	
 	
 
-	public rentalMovieUser(String userName,String password,String dataBlock, boolean isAdmin) {
-		super(userName, password, dataBlock);
+	public rentalMovieUser(String userName,String password,String country, boolean isAdmin) {
+		super(userName, password, country);
 		this.isAdmin=isAdmin;
-		this.Country=dataBlock;
-		this.MovieList= new LinkedList<Movie>();
-		this.Balance=0;
+		if(this.isAdmin)
+			type="admin";
+		else type="normal";
+		this.country=country;
+		this.movies= new ArrayList<Movie>();
+		this.balance=0;
 	}
 	
 	public boolean isAdmin() {
 		return this.isAdmin;
 	}
 	
-	public List<?> getMovies(){
-		return this.MovieList;
+	public ArrayList<Movie> getMovies(){
+		return this.movies;
 	}
 	
 	public String getCountry() {
-		return this.Country;
+		return this.country;
 	}
 	
 	public long getBalance() {
-		return this.Balance;
+		return this.balance;
 	}
 	
 	public void addBalance(long amount) {
-		this.Balance=this.Balance+amount;
+		this.balance=this.balance+amount;
 	}
 	
 	public void reduceBalance(long amount) {
-		this.Balance=this.Balance-amount;
+		this.balance=this.balance-amount;
 	}
 	
 	public void changeBalance(long newBalance) {
-		this.Balance=newBalance;
+		this.balance=newBalance;
 	}
 	
 	public boolean isRenting(String movieName) {
-		return MovieList.contains(movieName);
+		return movies.contains(movieName);
 	}
 	
 	public void addMovie(Movie movie) {
-		this.MovieList.add(movie);
+		this.movies.add(movie);
 	}
 	
 	public void removeMovie(Movie movie) {
-		this.MovieList.remove(movie);
+		this.movies.remove(movie);
 	}
 	
 
