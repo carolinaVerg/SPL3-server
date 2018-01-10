@@ -5,17 +5,17 @@ import java.util.LinkedList;
 public class MovieRentalService<T> extends UserServiceProtocol<T>{
 
 	@Override
-	public void handelRequest(String RequestName, String Parameters) {
-		String nextWord="";
+	public void handelRequest(String[] commandData) {
+		String RequestName=commandData[1];
 		switch (RequestName) {
 		case "balance":{
-			nextWord=Parameters.substring(0,Parameters.indexOf(" "));
+			String nextWord=commandData[2];
 			switch (nextWord) {
 			case "info":
 				this.ACK((T) ("balance"+((rentalMovieUser) this.userLogin()).getBalance()));
 				break;
 			case "add":{
-				String amount =Parameters.substring(nextWord.length()+1);
+				String amount =commandData[3];
 				int Intamount= Integer.parseInt(amount);
 				 ((rentalMovieUser) this.userLogin()).addBalance(Intamount);
 				 this.ACK((T) ("balance"+ ((rentalMovieUser) this.userLogin()).getBalance()+"addae"+amount) );
@@ -30,13 +30,13 @@ public class MovieRentalService<T> extends UserServiceProtocol<T>{
 		//...........................................................................................	
 		case "info":{
 			String toReturn="";
-			if(Parameters.length()==0) {
+			if(commandData.length<3) {
 				toReturn=String.join(",", MovieDataBase.getInstance().getMovieList()); 
 				this.ACK((T) ("info "+toReturn));
 				return;
 			}
 			else {
-				String movieName =Parameters;
+				String movieName =commandData[2];
 				Movie movie=MovieDataBase.getInstance().getMovie(movieName);
 				if(movie==null) {
 					this.ERROR((T) (movieName+ "do not exists"));
@@ -51,7 +51,7 @@ public class MovieRentalService<T> extends UserServiceProtocol<T>{
 			break;
 	//...............................................................................................		
 		case "rent":{
-			String movieName =Parameters;
+			String movieName =commandData[2];
 			Movie movie=MovieDataBase.getInstance().getMovie(movieName);
 			if(((rentalMovieUser) this.userLogin()).isRenting(movieName)| movie==null) {
 				this.ERROR((T) "rent error");
@@ -76,7 +76,7 @@ public class MovieRentalService<T> extends UserServiceProtocol<T>{
 			break;
 	//...............................................................................................		
 		case "return":{
-			String movieName =Parameters;
+			String movieName =commandData[2];
 			Movie movie=MovieDataBase.getInstance().getMovie(movieName);
 			if(!((rentalMovieUser) this.userLogin()).isRenting(movieName)| movie==null) {
 				this.ERROR((T) "return error");
@@ -90,28 +90,27 @@ public class MovieRentalService<T> extends UserServiceProtocol<T>{
 			break;
 	//...............................................................................................
 		case "addmovie":{
-			String parametersLeft=Parameters;
-			String movieName=parametersLeft.substring(0,parametersLeft.indexOf(" "));
-			parametersLeft=parametersLeft.substring(movieName.length()+1);
-			String amount=parametersLeft.substring(0,parametersLeft.indexOf(" "));
-			parametersLeft=parametersLeft.substring(amount.length()+1);
+			String movieName=commandData[2];
+			String amount=commandData[3];
 			int intAmount= Integer.parseInt(amount);
-			String price =parametersLeft.substring(0,parametersLeft.indexOf(" "));
-			parametersLeft=parametersLeft.substring(price.length()+1);
+			String price =commandData[4];
 			int intPrice =Integer.parseInt(price);
-			String bannedCountries =parametersLeft;
-			String country="";
 			LinkedList<String>bannedCountriesList= new LinkedList<String>();
-			while(bannedCountries.length()>0) {
-				if(bannedCountries.indexOf(",")!=-1) {
-					country=bannedCountries.substring(0,bannedCountries.indexOf(","));
-					bannedCountriesList.add(country);
-					bannedCountries= bannedCountries.substring(bannedCountries.indexOf(",")+1);
+			if(commandData.length>5) {
+				String bannedCountries =commandData[5];
+				String country="";
+			
+				while(bannedCountries.length()>0) {
+					if(bannedCountries.indexOf(",")!=-1) {
+						country=bannedCountries.substring(0,bannedCountries.indexOf(","));
+						bannedCountriesList.add(country);
+						bannedCountries= bannedCountries.substring(bannedCountries.indexOf(",")+1);
 					}
-				else {
-					country=bannedCountries;
-					bannedCountries="";
-					bannedCountriesList.add(country);
+					else {
+						country=bannedCountries;
+						bannedCountries="";
+						bannedCountriesList.add(country);
+					}
 				}
 			}
 			if(!((rentalMovieUser) this.userLogin()).isAdmin()| MovieDataBase.getInstance().getMovie(movieName)!=null) {
@@ -133,7 +132,7 @@ public class MovieRentalService<T> extends UserServiceProtocol<T>{
 			break;
 	//.............................................................................................		
 		case "remmovie":{
-			String movieName=Parameters;
+			String movieName=commandData[2];
 			Movie movie=MovieDataBase.getInstance().getMovie(movieName);
 			if(!((rentalMovieUser) this.userLogin()).isAdmin()| movie==null) {
 				this.ERROR((T) "remmovie failed");
@@ -153,10 +152,8 @@ public class MovieRentalService<T> extends UserServiceProtocol<T>{
 			break;
 	//..........................................................................................		
 		case "changeprice":{
-			String parametersLeft=Parameters;
-			String movieName=parametersLeft.substring(0,parametersLeft.indexOf(" "));
-			parametersLeft=parametersLeft.substring(movieName.length()+1);
-			String price=parametersLeft;
+			String movieName=commandData[2];
+			String price=commandData[3];
 			int intPrice =Integer.parseInt(price);
 			Movie movie=MovieDataBase.getInstance().getMovie(movieName);
 			if(!((rentalMovieUser) this.userLogin()).isAdmin()| movie==null) {
@@ -180,7 +177,6 @@ public class MovieRentalService<T> extends UserServiceProtocol<T>{
 
 	@Override
 	public User addUser(String userName, String password, String dataBlock) {
-		//TODO: checkThis
 		User normalUser = new rentalMovieUser(userName, password, dataBlock, "normal");
 		//TODO CHECK THIS
 		UsersDataBase.getInstance().addUser(normalUser);
