@@ -89,7 +89,7 @@ public class jsonParser {
 		userToAdd.addMovie(movie1);
 		userToAdd.addMovie(movie2);
 		userDataBase.addUser(userToAdd);
-		userDataBase.checkAdminState();
+		//userDataBase.checkAdminState();
 		try (Writer writer = new FileWriter("Database/example_Users.json")) {
 			gsonParser.toJson(userDataBase, writer);
 		} catch (IOException e) {

@@ -9,13 +9,8 @@ import com.google.gson.annotations.SerializedName;
 
 public class rentalMovieUser extends User implements Serializable{
 	
-	
-	
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
-	private boolean isAdmin=false;
+	//private boolean isAdmin=false;
 	@SerializedName("type")
 	private String type = "normal";
 	@SerializedName("movies")
@@ -31,10 +26,10 @@ public class rentalMovieUser extends User implements Serializable{
 		super(userName, password, country);
 		this.type=type;
 		System.out.println("The type is:"+type);
-		if(this.type.equals("admin"))
+		/*if(this.type.equals("admin"))
 			this.isAdmin=true;
 		else this.isAdmin=false;
-		System.out.println(isAdmin);
+		System.out.println(isAdmin);*/
 		this.country=country;
 		this.movies= new ArrayList<Movie>();
 		this.balance=0;
@@ -46,9 +41,9 @@ public class rentalMovieUser extends User implements Serializable{
 	
 	
 	//TODO: Maybe Change
-	public void setAdmin(boolean isAdmin) {
+	/*public void setAdmin(boolean isAdmin) {
 		this.isAdmin=isAdmin;
-	}
+	}*/
 	
 	public ArrayList<Movie> getMovies(){
 		return this.movies;
