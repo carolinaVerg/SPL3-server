@@ -27,19 +27,27 @@ public class rentalMovieUser extends User implements Serializable{
 	
 	
 
-	public rentalMovieUser(String userName,String password,String country, boolean isAdmin) {
+	public rentalMovieUser(String userName,String password,String country, String type) {
 		super(userName, password, country);
-		this.isAdmin=isAdmin;
-		if(this.isAdmin)
-			type="admin";
-		else type="normal";
+		this.type=type;
+		System.out.println("The type is:"+type);
+		if(this.type.equals("admin"))
+			this.isAdmin=true;
+		else this.isAdmin=false;
+		System.out.println(isAdmin);
 		this.country=country;
 		this.movies= new ArrayList<Movie>();
 		this.balance=0;
 	}
 	
 	public boolean isAdmin() {
-		return this.isAdmin;
+		return this.type.equals("admin");
+	}
+	
+	
+	//TODO: Maybe Change
+	public void setAdmin(boolean isAdmin) {
+		this.isAdmin=isAdmin;
 	}
 	
 	public ArrayList<Movie> getMovies(){

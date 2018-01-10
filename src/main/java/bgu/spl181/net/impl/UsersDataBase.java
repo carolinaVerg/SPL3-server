@@ -16,8 +16,8 @@ public  class UsersDataBase implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	private static ConcurrentHashMap<String, String> RegisterMap;
-	private ConcurrentHashMap<String, String> LoginMap;
-	private LinkedList<String>logedInList;
+	private transient ConcurrentHashMap<String, String> LoginMap;
+	private transient LinkedList<String>logedInList;
 	private static ConcurrentHashMap<String, User> UsersMap;
 	private static UsersDataBase Instance = new UsersDataBase();
 
@@ -66,11 +66,13 @@ public  class UsersDataBase implements Serializable {
 	}
 	
 	
-	//TODO: Check
+	
 	public void addUser(User user) {
 		if(!exists(user)) {
 			UsersMap.put(user.getUserName(), user);
 			RegisterMap.put(user.getUserName(), user.getPassword());
+			if(!users.contains(user))
+				users.add((rentalMovieUser)user);
 		}
 	}
 	public User getUser(String userName) {
@@ -81,6 +83,16 @@ public  class UsersDataBase implements Serializable {
 		if(RegisterMap.containsKey(user.getUserName()))
 			return true;
 		return false;
+	}
+	
+	
+	//TODO: Maybe Chnage
+	public void checkAdminState() {
+		for (rentalMovieUser user : users) {
+			if(user.isAdmin())
+				user.setAdmin(true);
+			else user.setAdmin(false);
+		}
 	}
 	
 	public static UsersDataBase getInstance() {

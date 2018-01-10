@@ -77,7 +77,7 @@ public class jsonParser {
 
 	public static void writeUsersToFile() {
 		
-		rentalMovieUser userToAdd = new rentalMovieUser("tryUser", "tryUser", "Israel", true);
+		rentalMovieUser userToAdd = new rentalMovieUser("tryUser", "tryUser", "Israel", "normal");
 		LinkedList<String> list1 = new LinkedList<String>();
 		LinkedList<String> list2 = new LinkedList<String>();
 		list1.add("country11");
@@ -89,9 +89,9 @@ public class jsonParser {
 		userToAdd.addMovie(movie1);
 		userToAdd.addMovie(movie2);
 		userDataBase.addUser(userToAdd);
-		
+		userDataBase.checkAdminState();
 		try (Writer writer = new FileWriter("Database/example_Users.json")) {
-			gsonParser.toJson(userDataBase.getAllUsers(), writer);
+			gsonParser.toJson(userDataBase, writer);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -104,7 +104,13 @@ public class jsonParser {
 		readUsersFromFile();
 		writeMoviesToFile();
 		writeUsersToFile();
-		System.out.println("STOP");*/		
+		System.out.println("STOP");*/
+		
+		System.out.println("STOP1");
+		readMoviesFromFile();
+		readUsersFromFile();
+		writeUsersToFile();
+		System.out.println("STOP2");
 		
 	}
 }

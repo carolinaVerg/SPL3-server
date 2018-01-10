@@ -180,7 +180,8 @@ public class MovieRentalService<T> extends UserServiceProtocol<T>{
 
 	@Override
 	public User addUser(String userName, String password, String dataBlock) {
-		User normalUser = new rentalMovieUser(userName, password, dataBlock, false);
+		//TODO: checkThis
+		User normalUser = new rentalMovieUser(userName, password, dataBlock, "normal");
 		//TODO CHECK THIS
 		UsersDataBase.getInstance().addUser(normalUser);
 		return null;

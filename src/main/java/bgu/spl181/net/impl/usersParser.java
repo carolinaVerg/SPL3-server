@@ -46,7 +46,10 @@ public class usersParser {
 			boolean isAdmin = currentUser.get("type").toString().equals("true");
 			JSONArray moviesData = (JSONArray) currentUser.get("movies");
 			int balance = Integer.parseInt(currentUser.get("balance").toString());
-			rentalMovieUser userToAdd = new rentalMovieUser(userName, password, country, isAdmin);
+			rentalMovieUser userToAdd=null;
+			if(isAdmin)
+				userToAdd = new rentalMovieUser(userName, password, country,"admin" );
+			else userToAdd = new rentalMovieUser(userName, password, country,"normal" );
 			userToAdd.addBalance(balance);
 			for (int j = 0; j < moviesData.size(); j++) {
 				userToAdd.addMovie(movieDataBase.getMovie(currentUser.get("name").toString()));

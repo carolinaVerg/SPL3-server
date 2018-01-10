@@ -20,7 +20,7 @@ public class MovieDataBase implements Serializable {
 	private static ConcurrentHashMap<String, Movie> MovieMap;
 	private static final MovieDataBase instance= new MovieDataBase();
 	private static int highestId=0;
-	//private static ArrayList<Movie> movies1;
+	
 	@SerializedName("movies")
 	private ArrayList<Movie> movies;
 	
