@@ -97,21 +97,8 @@ public class MovieRentalService<T> extends UserServiceProtocol<T>{
 			int intPrice =Integer.parseInt(price);
 			LinkedList<String>bannedCountriesList= new LinkedList<String>();
 			if(commandData.length>5) {
-				String bannedCountries =commandData[5];
-				String country="";
-			
-				while(bannedCountries.length()>0) {
-					if(bannedCountries.indexOf(",")!=-1) {
-						country=bannedCountries.substring(0,bannedCountries.indexOf(","));
-						bannedCountriesList.add(country);
-						bannedCountries= bannedCountries.substring(bannedCountries.indexOf(",")+1);
-					}
-					else {
-						country=bannedCountries;
-						bannedCountries="";
-						bannedCountriesList.add(country);
-					}
-				}
+			for(int i=5; i<commandData.length; i++)
+				bannedCountriesList.add(commandData[i]);
 			}
 			if(!((rentalMovieUser) this.userLogin()).isAdmin()| MovieDataBase.getInstance().getMovie(movieName)!=null) {
 				this.ERROR((T) "addmovie failed");

@@ -85,16 +85,6 @@ public  class UsersDataBase implements Serializable {
 		return false;
 	}
 	
-	
-	//TODO: Maybe Chnage
-	/*public void checkAdminState() {
-		for (rentalMovieUser user : users) {
-			if(user.isAdmin())
-				user.setAdmin(true);
-			else user.setAdmin(false);
-		}
-	}*/
-	
 	public static UsersDataBase getInstance() {
 		return Instance;
 	}

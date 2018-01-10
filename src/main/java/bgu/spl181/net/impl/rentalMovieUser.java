@@ -1,6 +1,7 @@
 package bgu.spl181.net.impl;
 
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,7 +15,8 @@ public class rentalMovieUser extends User implements Serializable{
 	@SerializedName("type")
 	private String type = "normal";
 	@SerializedName("movies")
-	private ArrayList<Movie> movies;
+	private ArrayList<movieNameId> movies;
+//	private ArrayList<Movie> fullMovies;
 	@SerializedName("country")
 	private String country;
 	@SerializedName("balance")
@@ -25,13 +27,8 @@ public class rentalMovieUser extends User implements Serializable{
 	public rentalMovieUser(String userName,String password,String country, String type) {
 		super(userName, password, country);
 		this.type=type;
-		System.out.println("The type is:"+type);
-		/*if(this.type.equals("admin"))
-			this.isAdmin=true;
-		else this.isAdmin=false;
-		System.out.println(isAdmin);*/
 		this.country=country;
-		this.movies= new ArrayList<Movie>();
+		this.movies= new ArrayList<movieNameId>();
 		this.balance=0;
 	}
 	
@@ -40,12 +37,7 @@ public class rentalMovieUser extends User implements Serializable{
 	}
 	
 	
-	//TODO: Maybe Change
-	/*public void setAdmin(boolean isAdmin) {
-		this.isAdmin=isAdmin;
-	}*/
-	
-	public ArrayList<Movie> getMovies(){
+	public ArrayList<movieNameId> getMovies(){
 		return this.movies;
 	}
 	
@@ -70,11 +62,16 @@ public class rentalMovieUser extends User implements Serializable{
 	}
 	
 	public boolean isRenting(String movieName) {
-		return movies.contains(movieName);
+		for (movieNameId movieNameId : movies) {
+			if(movieNameId.getName().equals(movieName))
+				return true;
+		}
+		return false;
 	}
 	
 	public void addMovie(Movie movie) {
-		this.movies.add(movie);
+		movieNameId movieToAdd = new movieNameId(movie.getName(), movie.getId());
+		this.movies.add(movieToAdd);
 	}
 	
 	public void removeMovie(Movie movie) {

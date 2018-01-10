@@ -1,13 +1,2 @@
-{"users":
-[
-{
-"type":"admin",
-"movies":[],
-"country":"united states",
-"balance":0,
-"username":"john",
-"password":"potato"
-},
-
-
-{"type":"normal","movies":[{"id":1,"name":"name1","price":24,"bannedCountries":["country11","country12"],"availableAmount":67,"totalAmount":123},{"id":2,"name":"name2","price":9,"bannedCountries":["country21","country22"],"availableAmount":43,"totalAmount":987}],"country":"Israel","balance":0,"username":"tryUser","DataBlock":"Israel","password":"tryUser"}]}
+{"users":[{"type":"admin","movies":[],"country":"united states","balance":0,"username":"john","password":"potato"},
+{"type":"normal","movies":[{"name":"name1","id":1},{"name":"name2","id":2}],"country":"Israel","balance":0,"username":"tryUser","DataBlock":"Israel","password":"tryUser"}]}

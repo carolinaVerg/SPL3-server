@@ -25,13 +25,13 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 	}
 
 	private String[] msgToArray(String message) {
-		Pattern pattern = Pattern.compile("\"[^\"]*\"|[^\\s]*");
+		Pattern pattern = Pattern.compile("\"[^\"]+\"|[^\\s]+");
 		ArrayList<String> dataList = new ArrayList<String>();
 		Matcher matcher = pattern.matcher(message);
 		while (matcher.find()) {
 			String nextEntry = matcher.group(0);
 			if (!nextEntry.equals("")) {
-				dataList.add(nextEntry.replaceAll("\"", ""));
+				dataList.add(nextEntry);
 			}
 		}
 		String[] dataArray = dataList.toArray(new String[0]);

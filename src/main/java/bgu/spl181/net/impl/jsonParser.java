@@ -28,6 +28,7 @@ public class jsonParser {
 	private static MovieDataBase movieDataBase = MovieDataBase.getInstance();
 	private static UsersDataBase userDataBase = UsersDataBase.getInstance();
 	private static Gson gsonParser = new Gson();
+	private static jsonParser instance  = new jsonParser();
 
 	public static void readMoviesFromFile() {
 
@@ -41,7 +42,7 @@ public class jsonParser {
 			e.printStackTrace();
 		}
 		
-		System.out.println("readMoviesFromFile - COMPLETED!");
+		//System.out.println("readMoviesFromFile - COMPLETED!");
 		
 	}
 
@@ -57,27 +58,31 @@ public class jsonParser {
 			e.printStackTrace();
 		}
 		
-		System.out.println("readUsersFromFile - COMPLETED!");
+		//System.out.println("readUsersFromFile - COMPLETED!");
 	}
 
 	public static void writeMoviesToFile() {
 	
-		LinkedList<String> list = new LinkedList<String>();
+		//Keep For Checking
+		/*LinkedList<String> list = new LinkedList<String>();
 		list.add("country1");
 		list.add("country2");
 		Movie movieToAdd = new Movie(4, "nameOfMovie", 35, list, 12, 2409);
-		movieDataBase.addMovie(movieToAdd);
+		movieDataBase.addMovie(movieToAdd);*/
 		
 		try (Writer writer = new FileWriter("Database/example_Movies.json")) {
 			gsonParser.toJson(movieDataBase, writer);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		//System.out.println("writeMoviesToFile - COMPLETED!");
 	}
 
 	public static void writeUsersToFile() {
 		
-		rentalMovieUser userToAdd = new rentalMovieUser("tryUser", "tryUser", "Israel", "normal");
+		//Keep For Checking
+		/*rentalMovieUser userToAdd = new rentalMovieUser("tryUser", "tryUser", "Israel", "normal");
 		LinkedList<String> list1 = new LinkedList<String>();
 		LinkedList<String> list2 = new LinkedList<String>();
 		list1.add("country11");
@@ -88,16 +93,23 @@ public class jsonParser {
 		Movie movie2 = new Movie(2, "name2", 9, list2, 43, 987);
 		userToAdd.addMovie(movie1);
 		userToAdd.addMovie(movie2);
-		userDataBase.addUser(userToAdd);
-		//userDataBase.checkAdminState();
+		userDataBase.addUser(userToAdd);*/
+		
+		
 		try (Writer writer = new FileWriter("Database/example_Users.json")) {
 			gsonParser.toJson(userDataBase, writer);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		//System.out.println("writeUsersToFile - COMPLETED!");
 
 	}
 
+	public static jsonParser getInstance() {
+		return instance;
+	}
+	
 	public static void main(String[] args) {
 		
 		/*readMoviesFromFile();
@@ -105,12 +117,6 @@ public class jsonParser {
 		writeMoviesToFile();
 		writeUsersToFile();
 		System.out.println("STOP");*/
-		
-		System.out.println("STOP1");
-		readMoviesFromFile();
-		readUsersFromFile();
-		writeUsersToFile();
-		System.out.println("STOP2");
 		
 	}
 }
