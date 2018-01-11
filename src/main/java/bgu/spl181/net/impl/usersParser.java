@@ -13,8 +13,8 @@ import org.json.simple.parser.ParseException;
 
 public class usersParser {
 
-	private static MovieDataBase movieDataBase = MovieDataBase.getInstance();
-	private static UsersDataBase userDataBase = UsersDataBase.getInstance();
+	private static MovieDataBase movieDataBase;
+	private static UsersDataBase userDataBase;
 
 	public static void parseUsersJSON() {
 

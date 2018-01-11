@@ -78,5 +78,4 @@ public class rentalMovieUser extends User implements Serializable{
 		this.movies.remove(movie);
 	}
 	
-
 }

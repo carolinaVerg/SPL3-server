@@ -14,7 +14,7 @@ import org.json.simple.parser.ParseException;
 
 public class moviesParser {
 
-	private static MovieDataBase movieDataBase = MovieDataBase.getInstance();
+	private static MovieDataBase movieDataBase;
 	
 	public static void parseMoviesJSON() {
 		JSONParser parser = new JSONParser();

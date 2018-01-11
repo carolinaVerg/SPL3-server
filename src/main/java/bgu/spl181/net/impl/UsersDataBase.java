@@ -19,7 +19,6 @@ public  class UsersDataBase implements Serializable {
 	private transient ConcurrentHashMap<String, String> LoginMap;
 	private transient LinkedList<String>logedInList;
 	private static ConcurrentHashMap<String, User> UsersMap;
-	private static UsersDataBase Instance = new UsersDataBase();
 
 	//TODO: Fix sync between ArrayList and HashMap
 	
@@ -27,7 +26,7 @@ public  class UsersDataBase implements Serializable {
 	private ArrayList<rentalMovieUser> users;
 	
 	
-	private UsersDataBase() {
+	public UsersDataBase() {
 		RegisterMap= new ConcurrentHashMap<String, String>();
 		LoginMap= new ConcurrentHashMap<String, String>();	
 		UsersMap=new ConcurrentHashMap<String,User>();
@@ -62,6 +61,10 @@ public  class UsersDataBase implements Serializable {
 	}
 	
 	public ConcurrentHashMap<String, String> getRegister() {
+		for (rentalMovieUser user : users) {
+			if(RegisterMap.get(user.getUserName())==null)
+				RegisterMap.put(user.getUserName(), user.getPassword());
+		}
 		return RegisterMap;
 	}
 	
@@ -85,7 +88,4 @@ public  class UsersDataBase implements Serializable {
 		return false;
 	}
 	
-	public static UsersDataBase getInstance() {
-		return Instance;
-	}
 }

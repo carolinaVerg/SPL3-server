@@ -25,12 +25,11 @@ import com.google.gson.stream.JsonWriter;
 
 public class jsonParser {
 
-	private static MovieDataBase movieDataBase = MovieDataBase.getInstance();
-	private static UsersDataBase userDataBase = UsersDataBase.getInstance();
+	private static MovieDataBase movieDataBase = new MovieDataBase();
+	private static UsersDataBase userDataBase = new UsersDataBase();
 	private static Gson gsonParser = new Gson();
-	private static jsonParser instance  = new jsonParser();
 
-	public static void readMoviesFromFile() {
+	public static MovieDataBase readMoviesFromFile() {
 
 		try {
 			movieDataBase = gsonParser.fromJson(new FileReader("Database/example_Movies.json"), MovieDataBase.class);
@@ -42,11 +41,12 @@ public class jsonParser {
 			e.printStackTrace();
 		}
 		
+		return movieDataBase;
 		//System.out.println("readMoviesFromFile - COMPLETED!");
 		
 	}
 
-	public static void readUsersFromFile() {
+	public static UsersDataBase readUsersFromFile() {
 		
 		try {
 			userDataBase = gsonParser.fromJson(new FileReader("Database/example_Users.json"), UsersDataBase.class);
@@ -58,10 +58,11 @@ public class jsonParser {
 			e.printStackTrace();
 		}
 		
+		return userDataBase;
 		//System.out.println("readUsersFromFile - COMPLETED!");
 	}
 
-	public static void writeMoviesToFile() {
+	public void writeMoviesToFile() {
 	
 		//Keep For Checking
 		/*LinkedList<String> list = new LinkedList<String>();
@@ -79,7 +80,7 @@ public class jsonParser {
 		//System.out.println("writeMoviesToFile - COMPLETED!");
 	}
 
-	public static void writeUsersToFile() {
+	public void writeUsersToFile() {
 		
 		//Keep For Checking
 		/*rentalMovieUser userToAdd = new rentalMovieUser("tryUser", "tryUser", "Israel", "normal");
@@ -104,10 +105,6 @@ public class jsonParser {
 		
 		//System.out.println("writeUsersToFile - COMPLETED!");
 
-	}
-
-	public static jsonParser getInstance() {
-		return instance;
 	}
 	
 	public static void main(String[] args) {

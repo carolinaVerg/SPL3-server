@@ -3,6 +3,12 @@ package bgu.spl181.net.impl;
 import java.util.LinkedList;
 
 public class MovieRentalService<T> extends UserServiceProtocol<T>{
+	MovieDataBase movieDataBase;
+	
+	public MovieRentalService(UsersDataBase usersDataBase, MovieDataBase movieDataBase) {
+		super(usersDataBase);
+		this.movieDataBase= movieDataBase;
+	}
 
 	@Override
 	public void handelRequest(String[] commandData) {
@@ -31,13 +37,13 @@ public class MovieRentalService<T> extends UserServiceProtocol<T>{
 		case "info":{
 			String toReturn="";
 			if(commandData.length<3) {
-				toReturn=String.join(",", MovieDataBase.getInstance().getMovieList()); 
+				toReturn=String.join(",", this.movieDataBase.getMovieList()); 
 				this.ACK((T) ("info "+toReturn));
 				return;
 			}
 			else {
 				String movieName =commandData[2];
-				Movie movie=MovieDataBase.getInstance().getMovie(movieName);
+				Movie movie=this.movieDataBase.getMovie(movieName);
 				if(movie==null) {
 					this.ERROR((T) (movieName+ "do not exists"));
 					return;
@@ -52,7 +58,7 @@ public class MovieRentalService<T> extends UserServiceProtocol<T>{
 	//...............................................................................................		
 		case "rent":{
 			String movieName =commandData[2];
-			Movie movie=MovieDataBase.getInstance().getMovie(movieName);
+			Movie movie=this.movieDataBase.getMovie(movieName);
 			if(((rentalMovieUser) this.userLogin()).isRenting(movieName)| movie==null) {
 				this.ERROR((T) "rent error");
 				return;
@@ -77,7 +83,7 @@ public class MovieRentalService<T> extends UserServiceProtocol<T>{
 	//...............................................................................................		
 		case "return":{
 			String movieName =commandData[2];
-			Movie movie=MovieDataBase.getInstance().getMovie(movieName);
+			Movie movie=this.movieDataBase.getMovie(movieName);
 			if(!((rentalMovieUser) this.userLogin()).isRenting(movieName)| movie==null) {
 				this.ERROR((T) "return error");
 				return;
@@ -100,13 +106,13 @@ public class MovieRentalService<T> extends UserServiceProtocol<T>{
 			for(int i=5; i<commandData.length; i++)
 				bannedCountriesList.add(commandData[i]);
 			}
-			if(!((rentalMovieUser) this.userLogin()).isAdmin()| MovieDataBase.getInstance().getMovie(movieName)!=null) {
+			if(!((rentalMovieUser) this.userLogin()).isAdmin()| this.movieDataBase.getMovie(movieName)!=null) {
 				this.ERROR((T) "addmovie failed");
 				return;
 			}
 			if(intAmount>0 & intPrice>0) {
-				Movie movie = new Movie(MovieDataBase.getInstance().getHighestId(), movieName, intPrice, bannedCountriesList, intAmount, intAmount);
-				MovieDataBase.getInstance().addMovie(movie);
+				Movie movie = new Movie(this.movieDataBase.getHighestId(), movieName, intPrice, bannedCountriesList, intAmount, intAmount);
+				this.movieDataBase.addMovie(movie);
 				this.ACK((T) ("addmovie"+movieName+"success"));
 				this.BROADCAST((T) ("movie"+movieName+movie.getAvailbleAmount()+movie.getPrice()));
 			}
@@ -120,7 +126,7 @@ public class MovieRentalService<T> extends UserServiceProtocol<T>{
 	//.............................................................................................		
 		case "remmovie":{
 			String movieName=commandData[2];
-			Movie movie=MovieDataBase.getInstance().getMovie(movieName);
+			Movie movie=this.movieDataBase.getMovie(movieName);
 			if(!((rentalMovieUser) this.userLogin()).isAdmin()| movie==null) {
 				this.ERROR((T) "remmovie failed");
 				return;
@@ -130,7 +136,7 @@ public class MovieRentalService<T> extends UserServiceProtocol<T>{
 				this.ERROR((T) "remmovie failed");
 				return;
 			}
-			MovieDataBase.getInstance().removeMovie(movie);
+			this.movieDataBase.removeMovie(movie);
 			this.ACK((T) ("remmovie"+movieName+"success"));
 			this.BROADCAST((T) ("movie"+movieName+"removed"));
 			
@@ -142,7 +148,7 @@ public class MovieRentalService<T> extends UserServiceProtocol<T>{
 			String movieName=commandData[2];
 			String price=commandData[3];
 			int intPrice =Integer.parseInt(price);
-			Movie movie=MovieDataBase.getInstance().getMovie(movieName);
+			Movie movie=this.movieDataBase.getMovie(movieName);
 			if(!((rentalMovieUser) this.userLogin()).isAdmin()| movie==null) {
 				this.ERROR((T) "changeprice failed");
 				return;
@@ -165,14 +171,20 @@ public class MovieRentalService<T> extends UserServiceProtocol<T>{
 	@Override
 	public User addUser(String userName, String password, String dataBlock) {
 		User normalUser = new rentalMovieUser(userName, password, dataBlock, "normal");
-		//TODO CHECK THIS
-		UsersDataBase.getInstance().addUser(normalUser);
+		this.getUserDataBase().addUser(normalUser);
 		return null;
 	}
 
 	@Override
 	public boolean ValidDataBlock(String DataBlock) {
-		// TODO Auto-generated method stub
+		try {
+			String toCheck= DataBlock.substring(0, DataBlock.indexOf("=")+1);
+			if(toCheck.equals("country="))
+				return true;
+		}
+		catch(Exception e){
+			return false;
+		}
 		return false;
 	}
 

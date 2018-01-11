@@ -17,6 +17,11 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 	private User user;
 	AtomicBoolean isLogin = new AtomicBoolean(false);
 	private String[] commandData;
+	private UsersDataBase userDataBase;
+	
+	public UserServiceProtocol(UsersDataBase userDataBase) {
+		this.userDataBase=userDataBase;
+	}
 
 	@Override
 	public void start(int connectionId, Connections<T> connections) {
@@ -60,11 +65,12 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 					this.ERROR((T) (commandType + "failed"));
 					return;
 				}
+				DataBlock=DataBlock.replaceAll("country=","");
 				if(this.isLogin.get()) {
 					this.ERROR((T) (commandType + "failed"));
 					return;
 				}
-				if(UsersDataBase.getInstance().getRegister().contains(UserName)) {
+				if(userDataBase.getRegister().get(UserName)!=null) {
 					this.ERROR((T) (commandType + "failed"));
 					return;
 				}
@@ -87,33 +93,34 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 					this.ERROR((T) (commandType + "failed"));
 					return;
 				}
-				if (UsersDataBase.getInstance().getLogin().containsKey(UserName)) {
+				if (userDataBase.getLogin().containsKey(UserName)) {
 					this.ERROR((T) (commandType + "failed"));
 					return;
 				}
-				if (!UsersDataBase.getInstance().getRegister().containsKey(UserName)
-						| !UsersDataBase.getInstance().getRegister().contains(Password)) {
+				if (!userDataBase.getRegister().containsKey(UserName)
+						| !userDataBase.getRegister().contains(Password)) {
 					this.ERROR((T) (commandType + "failed"));
 					return;
 				}
-				if (UsersDataBase.getInstance().getRegister().get(UserName) != Password) {
+				if (!userDataBase.getRegister().get(UserName).equals(Password)) {
+					
 					this.ERROR((T) (commandType + "failed"));
 					return;
 				}
-				UsersDataBase.getInstance().addLogin(UserName, Password);
+				userDataBase.addLogin(UserName, Password);
 				this.isLogin.compareAndSet(false, true);
-				this.user = UsersDataBase.getInstance().getUser(UserName);
+				this.user = userDataBase.getUser(UserName);
 				this.ACK((T) (commandType + "succeeded"));
 			}
 				break;
 
 			// ............................................................................................................
 			case "SIGNOUT": {
-				if (!UsersDataBase.getInstance().getLogin().contains(user.getUserName())) {
+				if (!userDataBase.getLogin().contains(user.getUserName())) {
 					this.ERROR((T) commandType);
 					return;
 				}
-				UsersDataBase.getInstance().removeLogin(user.getUserName());
+				userDataBase.removeLogin(user.getUserName());
 				this.ACK((T) (commandType + "succeeded"));
 				this.connections.disconnect(connectionId);
 				this.shouldTerminate.set(true);
@@ -122,7 +129,7 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 
 			// ...................................................................................................
 			case "REQUEST": {
-				if (!UsersDataBase.getInstance().getLogin().contains(user.getUserName())) {
+				if (this.user==null ||userDataBase.getLogin().get(this.user.getUserName())==null) {
 					this.ERROR((T) (commandType + "failed"));
 					return;
 				}
@@ -155,16 +162,20 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 	}
 
 	public void ACK(T commandType) {
-		this.connections.send(connectionId, (T) ("ACK" + commandType));
+		this.connections.send(connectionId, (T) ("ACK " + commandType+" "));
 	}
 
 	public void ERROR(T commandType) {
-		this.connections.send(connectionId, (T) ("ERROR" + commandType));
+		this.connections.send(connectionId, (T) ("ERROR " + commandType+" "));
 	}
 
 	public void BROADCAST(T message) {
-		this.connections.setBroadCastList(UsersDataBase.getInstance().getLogedList());
+		this.connections.setBroadCastList(userDataBase.getLogedList());
 		this.connections.broadcast(message);
+	}
+	
+	public UsersDataBase getUserDataBase() {
+		return this.userDataBase;
 	}
 
 	public abstract boolean ValidDataBlock(String DataBlock);

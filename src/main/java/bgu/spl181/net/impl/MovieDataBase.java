@@ -18,14 +18,13 @@ public class MovieDataBase implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	private static ConcurrentHashMap<String, Movie> MovieMap;
-	private static final MovieDataBase instance= new MovieDataBase();
 	private static int highestId=0;
 	
 	@SerializedName("movies")
 	private ArrayList<Movie> movies;
 	
 	
-	private MovieDataBase() {
+	public MovieDataBase() {
 		this.movies=new ArrayList<>();
 		MovieMap= new ConcurrentHashMap<>();
 		if(movies!=null)
@@ -73,10 +72,6 @@ public class MovieDataBase implements Serializable {
 	
 	public int getHighestId() {
 		return highestId;
-	}
-	
-	public static MovieDataBase getInstance() {
-		return instance;
 	}
 	
 }
