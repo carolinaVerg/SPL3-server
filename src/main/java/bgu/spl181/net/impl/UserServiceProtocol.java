@@ -53,7 +53,7 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 			switch (commandType) {
 			case "REGISTER": {
 				if(this.commandData.length<3) {
-					this.ERROR((T) (commandType + "failed"));
+					this.ERROR((T) (commandType + " failed"));
 					return;
 				}
 				String UserName = this.commandData[1];
@@ -62,21 +62,21 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 				if(this.commandData.length>3)
 					DataBlock=this.commandData[3];
 				if(!this.ValidDataBlock(DataBlock)) {
-					this.ERROR((T) (commandType + "failed"));
+					this.ERROR((T) (commandType + " failed"));
 					return;
 				}
 				DataBlock=DataBlock.replaceAll("country=","");
 				if(this.isLogin.get()) {
-					this.ERROR((T) (commandType + "failed"));
+					this.ERROR((T) (commandType + " failed"));
 					return;
 				}
 				if(userDataBase.getRegister().get(UserName)!=null) {
-					this.ERROR((T) (commandType + "failed"));
+					this.ERROR((T) (commandType + " failed"));
 					return;
 				}
 				this.addUser(UserName, Password, DataBlock);
 				
-				this.ACK((T) (commandType + "succeeded"));
+				this.ACK((T) (commandType + " succeeded"));
 			}
 				break;
 
@@ -84,33 +84,33 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 
 			case "LOGIN": {
 				if (this.commandData.length<3) {
-					this.ERROR((T) (commandType + "failed"));
+					this.ERROR((T) (commandType + " failed"));
 					return;
 				}
 				String UserName = this.commandData[1];
 				String Password = this.commandData[2];
 				if (this.isLogin.get()) {
-					this.ERROR((T) (commandType + "failed"));
+					this.ERROR((T) (commandType + " failed"));
 					return;
 				}
 				if (userDataBase.getLogin().containsKey(UserName)) {
-					this.ERROR((T) (commandType + "failed"));
+					this.ERROR((T) (commandType + " failed"));
 					return;
 				}
 				if (!userDataBase.getRegister().containsKey(UserName)
 						| !userDataBase.getRegister().contains(Password)) {
-					this.ERROR((T) (commandType + "failed"));
+					this.ERROR((T) (commandType + " failed"));
 					return;
 				}
 				if (!userDataBase.getRegister().get(UserName).equals(Password)) {
 					
-					this.ERROR((T) (commandType + "failed"));
+					this.ERROR((T) (commandType + " failed"));
 					return;
 				}
 				userDataBase.addLogin(UserName, Password);
 				this.isLogin.compareAndSet(false, true);
 				this.user = userDataBase.getUser(UserName);
-				this.ACK((T) (commandType + "succeeded"));
+				this.ACK((T) (commandType + " succeeded"));
 			}
 				break;
 
@@ -121,7 +121,7 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 					return;
 				}
 				userDataBase.removeLogin(user.getUserName());
-				this.ACK((T) (commandType + "succeeded"));
+				this.ACK((T) (commandType + " succeeded"));
 				this.connections.disconnect(connectionId);
 				this.shouldTerminate.set(true);
 			}
@@ -130,7 +130,7 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 			// ...................................................................................................
 			case "REQUEST": {
 				if (this.user==null ||userDataBase.getLogin().get(this.user.getUserName())==null) {
-					this.ERROR((T) (commandType + "failed"));
+					this.ERROR((T) (commandType + " failed"));
 					return;
 				}
 				String RequestName = this.commandData[1];
@@ -162,7 +162,7 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 	}
 
 	public void ACK(T commandType) {
-		this.connections.send(connectionId, (T) ("ACK " + commandType+" "));
+		this.connections.send(connectionId, (T)("ACK "+commandType));
 	}
 
 	public void ERROR(T commandType) {

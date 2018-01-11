@@ -45,6 +45,7 @@ public  class UsersDataBase implements Serializable {
 	public void addLogin(String UserName, String Password) {
 		LoginMap.putIfAbsent(UserName, Password);
 		logedInList.add(UserName);
+		
 	}
 	
 	public void removeLogin(String UserName) {
@@ -78,7 +79,14 @@ public  class UsersDataBase implements Serializable {
 				users.add((rentalMovieUser)user);
 		}
 	}
+	
 	public User getUser(String userName) {
+		for (rentalMovieUser user: users) {
+			if(UsersMap.get(user.getUserName())==null)
+				UsersMap.put(user.getUserName(), user);
+			if(RegisterMap.get(user.getUserName())==null)
+				RegisterMap.put(user.getUserName(), user.getPassword());
+		}
 		return UsersMap.get(userName);
 	}
 	

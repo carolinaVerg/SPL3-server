@@ -74,4 +74,12 @@ public class MovieDataBase implements Serializable {
 		return highestId;
 	}
 	
+	public ArrayList<String> getMovieNameList(){
+		ArrayList<String> listToReturn = new ArrayList<String>();
+		for (Movie movie : movies) {
+			listToReturn.add(movie.getName());
+		}
+		return listToReturn;
+	}
+	
 }

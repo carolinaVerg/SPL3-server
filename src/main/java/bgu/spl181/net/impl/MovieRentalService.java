@@ -18,13 +18,13 @@ public class MovieRentalService<T> extends UserServiceProtocol<T>{
 			String nextWord=commandData[2];
 			switch (nextWord) {
 			case "info":
-				this.ACK((T) ("balance"+((rentalMovieUser) this.userLogin()).getBalance()));
+				this.ACK((T) ("balance "+((rentalMovieUser) this.userLogin()).getBalance()));
 				break;
 			case "add":{
 				String amount =commandData[3];
 				int Intamount= Integer.parseInt(amount);
 				 ((rentalMovieUser) this.userLogin()).addBalance(Intamount);
-				 this.ACK((T) ("balance"+ ((rentalMovieUser) this.userLogin()).getBalance()+"addae"+amount) );
+				 this.ACK((T) ("balance "+ ((rentalMovieUser) this.userLogin()).getBalance()+"add "+amount) );
 			}
 				break;
 
@@ -37,7 +37,7 @@ public class MovieRentalService<T> extends UserServiceProtocol<T>{
 		case "info":{
 			String toReturn="";
 			if(commandData.length<3) {
-				toReturn=String.join(",", this.movieDataBase.getMovieList()); 
+				toReturn=String.join(",", this.movieDataBase.getMovieNameList()); 
 				this.ACK((T) ("info "+toReturn));
 				return;
 			}
