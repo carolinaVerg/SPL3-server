@@ -2,6 +2,7 @@ package bgu.spl181.net.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -18,9 +19,11 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 	AtomicBoolean isLogin = new AtomicBoolean(false);
 	private String[] commandData;
 	private UsersDataBase userDataBase;
+	private jsonParser parser;
 	
-	public UserServiceProtocol(UsersDataBase userDataBase) {
+	public UserServiceProtocol(UsersDataBase userDataBase, jsonParser parser) {
 		this.userDataBase=userDataBase;
+		this.parser=parser;
 	}
 
 	@Override
@@ -36,7 +39,7 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 		while (matcher.find()) {
 			String nextEntry = matcher.group(0);
 			if (!nextEntry.equals("")) {
-				dataList.add(nextEntry);
+				dataList.add(nextEntry.replaceAll("\"", ""));
 			}
 		}
 		String[] dataArray = dataList.toArray(new String[0]);
@@ -53,7 +56,7 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 			switch (commandType) {
 			case "REGISTER": {
 				if(this.commandData.length<3) {
-					this.ERROR((T) (commandType + " failed"));
+					this.ERROR((T) ("registration failed"));
 					return;
 				}
 				String UserName = this.commandData[1];
@@ -62,21 +65,22 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 				if(this.commandData.length>3)
 					DataBlock=this.commandData[3];
 				if(!this.ValidDataBlock(DataBlock)) {
-					this.ERROR((T) (commandType + " failed"));
+					this.ERROR((T) ("registration " + "failed"));
 					return;
 				}
 				DataBlock=DataBlock.replaceAll("country=","");
 				if(this.isLogin.get()) {
-					this.ERROR((T) (commandType + " failed"));
+					this.ERROR((T) ("registration " + "failed"));
 					return;
 				}
 				if(userDataBase.getRegister().get(UserName)!=null) {
-					this.ERROR((T) (commandType + " failed"));
+					this.ERROR((T) ("registration " + "failed"));
 					return;
 				}
 				this.addUser(UserName, Password, DataBlock);
 				
-				this.ACK((T) (commandType + " succeeded"));
+				this.ACK((T) ("registration " + "succeeded"));
+				this.parser.writeUsersToFile();
 			}
 				break;
 
@@ -84,44 +88,47 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 
 			case "LOGIN": {
 				if (this.commandData.length<3) {
-					this.ERROR((T) (commandType + " failed"));
+					this.ERROR((T) ("login " + " failed"));
 					return;
 				}
 				String UserName = this.commandData[1];
 				String Password = this.commandData[2];
 				if (this.isLogin.get()) {
-					this.ERROR((T) (commandType + " failed"));
+					this.ERROR((T) ("login " + "failed"));
 					return;
 				}
 				if (userDataBase.getLogin().containsKey(UserName)) {
-					this.ERROR((T) (commandType + " failed"));
+					this.ERROR((T) ("login " + "failed"));
 					return;
 				}
 				if (!userDataBase.getRegister().containsKey(UserName)
 						| !userDataBase.getRegister().contains(Password)) {
-					this.ERROR((T) (commandType + " failed"));
+					this.ERROR((T) ("login " + "failed"));
 					return;
 				}
 				if (!userDataBase.getRegister().get(UserName).equals(Password)) {
 					
-					this.ERROR((T) (commandType + " failed"));
+					this.ERROR((T) ("login " + "failed"));
 					return;
 				}
 				userDataBase.addLogin(UserName, Password);
 				this.isLogin.compareAndSet(false, true);
 				this.user = userDataBase.getUser(UserName);
-				this.ACK((T) (commandType + " succeeded"));
+				this.user.setConectionId(connectionId);
+				this.user.setLogedIn(true);
+				this.ACK((T) ("login " + "succeeded"));
 			}
 				break;
 
 			// ............................................................................................................
 			case "SIGNOUT": {
-				if (!userDataBase.getLogin().contains(user.getUserName())) {
-					this.ERROR((T) commandType);
+				if (userDataBase.getLogin().get(user.getUserName())==null) {
+					this.ERROR((T) "signout");
 					return;
 				}
 				userDataBase.removeLogin(user.getUserName());
-				this.ACK((T) (commandType + " succeeded"));
+				this.user.setLogedIn(false);
+				this.ACK((T) ("signout" + " succeeded"));
 				this.connections.disconnect(connectionId);
 				this.shouldTerminate.set(true);
 			}
@@ -130,7 +137,7 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 			// ...................................................................................................
 			case "REQUEST": {
 				if (this.user==null ||userDataBase.getLogin().get(this.user.getUserName())==null) {
-					this.ERROR((T) (commandType + " failed"));
+					this.ERROR((T) ("request " +commandData[1]+ " failed"));
 					return;
 				}
 				String RequestName = this.commandData[1];
@@ -138,6 +145,8 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 				if (this.commandData.length>2)
 					Parameters = this.commandData[2];
 				this.handelRequest(this.commandData);
+				parser.writeMoviesToFile();
+				parser.writeUsersToFile();
 			}
 				break;
 
@@ -170,7 +179,12 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 	}
 
 	public void BROADCAST(T message) {
-		this.connections.setBroadCastList(userDataBase.getLogedList());
+		LinkedList<Integer> broadCastList=new LinkedList<Integer>();
+		for(int i =0; i<this.userDataBase.getAllUsers().size(); i++) {
+			if(this.userDataBase.getAllUsers().get(i).getLogedIn())
+				broadCastList.add(userDataBase.getAllUsers().get(i).getConnectionId());
+		}
+		this.connections.setBroadCastList(broadCastList);
 		this.connections.broadcast(message);
 	}
 	

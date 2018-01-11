@@ -17,7 +17,6 @@ public  class UsersDataBase implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private static ConcurrentHashMap<String, String> RegisterMap;
 	private transient ConcurrentHashMap<String, String> LoginMap;
-	private transient LinkedList<String>logedInList;
 	private static ConcurrentHashMap<String, User> UsersMap;
 
 	//TODO: Fix sync between ArrayList and HashMap
@@ -30,12 +29,16 @@ public  class UsersDataBase implements Serializable {
 		RegisterMap= new ConcurrentHashMap<String, String>();
 		LoginMap= new ConcurrentHashMap<String, String>();	
 		UsersMap=new ConcurrentHashMap<String,User>();
-		logedInList= new LinkedList<String>();
 		users = new ArrayList<rentalMovieUser>();
-		if(users!=null)
+	}
+	
+	public void updateData() {
+		if(users!=null) {
 			for(int i=0; i<users.size(); i++) {
 				addUser(users.get(i));
 			}
+		}
+		
 	}
 
 	public ArrayList<rentalMovieUser> getAllUsers(){
@@ -44,18 +47,13 @@ public  class UsersDataBase implements Serializable {
 	
 	public void addLogin(String UserName, String Password) {
 		LoginMap.putIfAbsent(UserName, Password);
-		logedInList.add(UserName);
 		
 	}
 	
 	public void removeLogin(String UserName) {
 		LoginMap.remove(UserName);
-		logedInList.remove(UserName);
 	}
 	
-	public List<String> getLogedList(){
-		return this.logedInList;
-	}
 	
 	public ConcurrentHashMap<String, String>  getLogin() {
 		return LoginMap;

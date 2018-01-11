@@ -12,7 +12,8 @@ public class ReactorMain {
 	}
 
 	public static void main(String[] args) {
-		Reactor<String> server = new Reactor<String>(8, 7777, ()-> new MovieRentalService(jsonParser.readUsersFromFile(),jsonParser.readMoviesFromFile()), ()-> new LineMessageEncoderDecoder()) ;
+		jsonParser parser =new jsonParser();
+		Reactor<String> server = new Reactor<String>(8, 7877, ()-> new MovieRentalService(parser.readUsersFromFile(),parser.readMoviesFromFile(), parser), ()-> new LineMessageEncoderDecoder()) ;
 			
 		server.serve();
 	}

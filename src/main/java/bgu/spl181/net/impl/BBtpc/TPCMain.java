@@ -17,8 +17,9 @@ public class TPCMain {
 
 	
 	public static void main(String[] args) {
+		jsonParser parser =new jsonParser();
 	
-		BaseServer<String> movieRentalServer= new BaseServer<String>(7877,()-> new MovieRentalService(jsonParser.readUsersFromFile(),jsonParser.readMoviesFromFile()), ()-> new LineMessageEncoderDecoder()) {
+		BaseServer<String> movieRentalServer= new BaseServer<String>(7877,()-> new MovieRentalService(parser.readUsersFromFile(),parser.readMoviesFromFile(), parser), ()-> new LineMessageEncoderDecoder()) {
 
 			@Override
 			protected void execute(BlockingConnectionHandler<String> handler) {

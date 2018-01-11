@@ -2,11 +2,14 @@ package bgu.spl181.net.impl;
 
 import java.util.LinkedList;
 
+import javax.swing.JEditorPane;
+
 public class MovieRentalService<T> extends UserServiceProtocol<T>{
-	MovieDataBase movieDataBase;
+	private MovieDataBase movieDataBase;
 	
-	public MovieRentalService(UsersDataBase usersDataBase, MovieDataBase movieDataBase) {
-		super(usersDataBase);
+	
+	public MovieRentalService(UsersDataBase usersDataBase, MovieDataBase movieDataBase, jsonParser parser) {
+		super(usersDataBase, parser);
 		this.movieDataBase= movieDataBase;
 	}
 
@@ -24,7 +27,7 @@ public class MovieRentalService<T> extends UserServiceProtocol<T>{
 				String amount =commandData[3];
 				int Intamount= Integer.parseInt(amount);
 				 ((rentalMovieUser) this.userLogin()).addBalance(Intamount);
-				 this.ACK((T) ("balance "+ ((rentalMovieUser) this.userLogin()).getBalance()+"add "+amount) );
+				 this.ACK((T) ("balance "+ ((rentalMovieUser) this.userLogin()).getBalance()+" add "+amount) );
 			}
 				break;
 
@@ -45,11 +48,13 @@ public class MovieRentalService<T> extends UserServiceProtocol<T>{
 				String movieName =commandData[2];
 				Movie movie=this.movieDataBase.getMovie(movieName);
 				if(movie==null) {
-					this.ERROR((T) (movieName+ "do not exists"));
+					this.ERROR((T) ("request info"));
 					return;
 				}
-				toReturn=movie.getName()+ movie.getAvailbleAmount()+movie.getPrice()+movie.getBannedCountries()
-				+movie.getId()+movie.getTotalAmount();
+				if(movie.getBannedCountries().size()>0)
+					toReturn=movie.getName()+" "+ movie.getAvailbleAmount()+" "+movie.getPrice()+" "+movie.getBannedCountries();
+				else
+					toReturn=movie.getName()+" "+ movie.getAvailbleAmount()+" "+movie.getPrice();
 				this.ACK((T) ("info "+toReturn));
 			}
 			
@@ -60,23 +65,23 @@ public class MovieRentalService<T> extends UserServiceProtocol<T>{
 			String movieName =commandData[2];
 			Movie movie=this.movieDataBase.getMovie(movieName);
 			if(((rentalMovieUser) this.userLogin()).isRenting(movieName)| movie==null) {
-				this.ERROR((T) "rent error");
+				this.ERROR((T) "request rent failed");
 				return;
 			}
 			if(movie.isBanned(((rentalMovieUser) this.userLogin()).getCountry())| movie.getAvailbleAmount()==0) {
-				this.ERROR((T) "rent error");
+				this.ERROR((T) "request rent failed");
 				return;
 			}
 			if(((rentalMovieUser) this.userLogin()).getBalance()<movie.getPrice()) {
-				this.ERROR((T) "rent error");
+				this.ERROR((T) "request rent failed");
 				return;
 			}
 			
 			((rentalMovieUser) this.userLogin()).addMovie(movie);
 			((rentalMovieUser) this.userLogin()).reduceBalance(movie.getPrice());
 			movie.reduceAmount();
-			this.ACK((T) ("rent"+movieName+"success"));
-			this.BROADCAST((T) ("movie"+movieName+movie.getAvailbleAmount()+movie.getPrice()));
+			this.ACK((T) ("rent "+movieName+" success"));
+			this.BROADCAST((T) ("movie "+movieName+" "+movie.getAvailbleAmount()+" "+movie.getPrice()));
 			
 		}
 			break;
@@ -85,13 +90,13 @@ public class MovieRentalService<T> extends UserServiceProtocol<T>{
 			String movieName =commandData[2];
 			Movie movie=this.movieDataBase.getMovie(movieName);
 			if(!((rentalMovieUser) this.userLogin()).isRenting(movieName)| movie==null) {
-				this.ERROR((T) "return error");
+				this.ERROR((T) "request return failed");
 				return;
 			}
 			((rentalMovieUser) this.userLogin()).removeMovie(movie);
 			movie.incAmount();
-			this.ACK((T) ("return"+ movieName+"success"));
-			this.BROADCAST((T) ("movie"+movieName+movie.getAvailbleAmount()+movie.getPrice()));
+			this.ACK((T) ("return "+ movieName+"success"));
+			this.BROADCAST((T) ("movie "+movieName+movie.getAvailbleAmount()+" " +movie.getPrice()));
 		}
 			break;
 	//...............................................................................................
@@ -107,17 +112,17 @@ public class MovieRentalService<T> extends UserServiceProtocol<T>{
 				bannedCountriesList.add(commandData[i]);
 			}
 			if(!((rentalMovieUser) this.userLogin()).isAdmin()| this.movieDataBase.getMovie(movieName)!=null) {
-				this.ERROR((T) "addmovie failed");
+				this.ERROR((T) "request addmovie failed");
 				return;
 			}
 			if(intAmount>0 & intPrice>0) {
 				Movie movie = new Movie(this.movieDataBase.getHighestId(), movieName, intPrice, bannedCountriesList, intAmount, intAmount);
 				this.movieDataBase.addMovie(movie);
-				this.ACK((T) ("addmovie"+movieName+"success"));
-				this.BROADCAST((T) ("movie"+movieName+movie.getAvailbleAmount()+movie.getPrice()));
+				this.ACK((T) ("addmovie "+movieName+" success"));
+				this.BROADCAST((T) ("movie "+movieName+" " +movie.getAvailbleAmount()+" "+movie.getPrice()));
 			}
 			else {
-				this.ERROR((T) "addmovie failed");
+				this.ERROR((T) "request addmovie failed");
 				return;
 			}
 		}
@@ -128,17 +133,17 @@ public class MovieRentalService<T> extends UserServiceProtocol<T>{
 			String movieName=commandData[2];
 			Movie movie=this.movieDataBase.getMovie(movieName);
 			if(!((rentalMovieUser) this.userLogin()).isAdmin()| movie==null) {
-				this.ERROR((T) "remmovie failed");
+				this.ERROR((T) "request remmovie failed");
 				return;
 			}
 			
 			if(movie.getAvailbleAmount()!=movie.getTotalAmount()) {
-				this.ERROR((T) "remmovie failed");
+				this.ERROR((T) "request remmovie failed");
 				return;
 			}
 			this.movieDataBase.removeMovie(movie);
-			this.ACK((T) ("remmovie"+movieName+"success"));
-			this.BROADCAST((T) ("movie"+movieName+"removed"));
+			this.ACK((T) ("remmovie "+movieName+" success"));
+			this.BROADCAST((T) ("movie "+movieName+" removed"));
 			
 		}
 			
@@ -150,16 +155,16 @@ public class MovieRentalService<T> extends UserServiceProtocol<T>{
 			int intPrice =Integer.parseInt(price);
 			Movie movie=this.movieDataBase.getMovie(movieName);
 			if(!((rentalMovieUser) this.userLogin()).isAdmin()| movie==null) {
-				this.ERROR((T) "changeprice failed");
+				this.ERROR((T) "request changeprice failed");
 				return;
 			}
 			if(intPrice<0| intPrice==0) {
-				this.ERROR((T) "changeprice failed");
+				this.ERROR((T) "request changeprice failed");
 				return;
 			}
 			movie.setPrice(intPrice);
-			this.ACK((T) ("changeprice"+movieName+"success"));
-			this.BROADCAST((T) ("movie"+movieName+movie.getAvailbleAmount()+movie.getPrice()));
+			this.ACK((T) ("changeprice "+movieName+" success"));
+			this.BROADCAST((T) ("movie "+movieName+movie.getAvailbleAmount()+" "+ movie.getPrice()));
 		}
 			
 			break;

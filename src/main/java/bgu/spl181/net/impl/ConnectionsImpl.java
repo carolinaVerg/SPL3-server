@@ -15,12 +15,12 @@ import bgu.spl181.net.srv.bidi.ConnectionHandler;
 public class ConnectionsImpl<T> implements Connections<T> {
 	
 	private ConcurrentHashMap<Integer, ConnectionHandler<T>> connectionMap;
-	private List<String> broadCastList;
+	private List<Integer> broadCastList;
 	private AtomicInteger connectionId= new AtomicInteger(0);
 
 	public ConnectionsImpl() {
 		this.connectionMap = new ConcurrentHashMap<Integer, ConnectionHandler<T>>();
-		this.broadCastList= new LinkedList<String>();
+		this.broadCastList= new LinkedList<Integer>();
 	}
 	
 	@Override
@@ -35,7 +35,7 @@ public class ConnectionsImpl<T> implements Connections<T> {
 	public void broadcast(T msg) {
 		for (Map.Entry<Integer, ConnectionHandler<T>> entry : connectionMap.entrySet()) {
 			if(this.broadCastList.contains(entry.getKey()))
-				entry.getValue().send(msg);
+				entry.getValue().send((T) ("BROADCAST "+msg));
 		}
 	}
 
@@ -62,7 +62,7 @@ public class ConnectionsImpl<T> implements Connections<T> {
 		return this.connectionMap.get(connId);
 	}
 	
-	public void setBroadCastList(List<String> broadCast) {
+	public void setBroadCastList(List<Integer> broadCast) {
 		this.broadCastList=broadCast;
 	}
 	

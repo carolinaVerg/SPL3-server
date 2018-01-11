@@ -25,11 +25,17 @@ import com.google.gson.stream.JsonWriter;
 
 public class jsonParser {
 
-	private static MovieDataBase movieDataBase = new MovieDataBase();
-	private static UsersDataBase userDataBase = new UsersDataBase();
-	private static Gson gsonParser = new Gson();
+	private MovieDataBase movieDataBase;
+	private UsersDataBase userDataBase;
+	private Gson gsonParser;
 
-	public static MovieDataBase readMoviesFromFile() {
+	public jsonParser() {
+		this.movieDataBase=new MovieDataBase();
+		this.userDataBase=new UsersDataBase();
+		this.gsonParser=new Gson();
+	}
+	
+	public MovieDataBase readMoviesFromFile() {
 
 		try {
 			movieDataBase = gsonParser.fromJson(new FileReader("Database/example_Movies.json"), MovieDataBase.class);
@@ -40,13 +46,13 @@ public class jsonParser {
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		
+		movieDataBase.updateData();
 		return movieDataBase;
 		//System.out.println("readMoviesFromFile - COMPLETED!");
 		
 	}
 
-	public static UsersDataBase readUsersFromFile() {
+	public UsersDataBase readUsersFromFile() {
 		
 		try {
 			userDataBase = gsonParser.fromJson(new FileReader("Database/example_Users.json"), UsersDataBase.class);
@@ -57,7 +63,7 @@ public class jsonParser {
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		
+		userDataBase.updateData();
 		return userDataBase;
 		//System.out.println("readUsersFromFile - COMPLETED!");
 	}

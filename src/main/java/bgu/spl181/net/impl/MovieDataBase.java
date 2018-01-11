@@ -27,9 +27,16 @@ public class MovieDataBase implements Serializable {
 	public MovieDataBase() {
 		this.movies=new ArrayList<>();
 		MovieMap= new ConcurrentHashMap<>();
+	}
+	
+	public void updateData() {
 		if(movies!=null)
 			for(int i=0; i<movies.size(); i++)
 				addMovie(movies.get(i));
+		for (ConcurrentHashMap.Entry<String, Movie> entry : MovieMap.entrySet()) {
+			if(!movies.contains(entry.getValue()))
+				movies.add(entry.getValue());
+		}
 	}
 	
 	public ArrayList<Movie> getAllmovies1() {
@@ -67,6 +74,7 @@ public class MovieDataBase implements Serializable {
 		movies.remove(movie);
 		if(movie.getId()==highestId-1)
 			highestId--;
+		movies.remove(movie);
 		
 	}
 	
@@ -76,8 +84,10 @@ public class MovieDataBase implements Serializable {
 	
 	public ArrayList<String> getMovieNameList(){
 		ArrayList<String> listToReturn = new ArrayList<String>();
+		String movieName;
 		for (Movie movie : movies) {
-			listToReturn.add(movie.getName());
+			movieName='"'+movie.getName()+'"';
+			listToReturn.add(movieName);
 		}
 		return listToReturn;
 	}
