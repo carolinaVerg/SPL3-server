@@ -26,7 +26,7 @@ public class Reactor<T> implements Server<T> {
 
     private Thread selectorThread;
     private final ConcurrentLinkedQueue<Runnable> selectorTasks = new ConcurrentLinkedQueue<>();
-    private Connections<T> connections;
+    private ConnectionsImpl<T> connectionsImpl;
     
     public Reactor(
             int numThreads,
@@ -38,7 +38,7 @@ public class Reactor<T> implements Server<T> {
         this.port = port;
         this.protocolFactory = protocolFactory;
         this.readerFactory = readerFactory;
-        this.connections= new ConnectionsImpl<T>();
+        this.connectionsImpl= new ConnectionsImpl<T>();
     }
 
     @Override
@@ -105,8 +105,10 @@ public class Reactor<T> implements Server<T> {
                 readerFactory.get(),
                 protocolFactory.get(),
                 clientChan,
+                this.connectionsImpl,
                 this);
-        handler.getProtocol().start(handler.getConnectionId(), this.connections);
+        this.connectionsImpl.addHandler(handler);
+        handler.getProtocol().start(handler.getConnectionId(), this.connectionsImpl);
         clientChan.register(selector, SelectionKey.OP_READ, handler);
     }
 

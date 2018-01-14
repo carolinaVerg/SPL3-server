@@ -3,6 +3,7 @@ package bgu.spl181.net.srv;
 import bgu.spl181.net.api.MessageEncoderDecoder;
 import bgu.spl181.net.api.MessagingProtocol;
 import bgu.spl181.net.api.bidi.BidiMessagingProtocol;
+import bgu.spl181.net.impl.ConnectionsImpl;
 import bgu.spl181.net.srv.bidi.ConnectionHandler;
 
 import java.io.IOException;
@@ -22,17 +23,20 @@ public class NonBlockingConnectionHandler<T> implements ConnectionHandler<T> {
     private final Queue<ByteBuffer> writeQueue = new ConcurrentLinkedQueue<>();
     private final SocketChannel chan;
     private final Reactor reactor;
+    private ConnectionsImpl<T> connectionsImpl;
     private int connectionId=0;
 
     public NonBlockingConnectionHandler(
             MessageEncoderDecoder<T> reader,
             BidiMessagingProtocol<T> protocol,
             SocketChannel chan,
+            ConnectionsImpl<T> connectionsImpl,
             Reactor reactor) {
         this.chan = chan;
         this.encdec = reader;
         this.protocol = protocol;
         this.reactor = reactor;
+        this.connectionsImpl=connectionsImpl;
     }
 
     public Runnable continueRead() {
@@ -52,8 +56,8 @@ public class NonBlockingConnectionHandler<T> implements ConnectionHandler<T> {
                     while (buf.hasRemaining()) {
                         T nextMessage = encdec.decodeNextByte(buf.get());
                         if (nextMessage != null) {
-                            protocol.process(nextMessage);
-                            
+                            connectionsImpl.addHandler(this);
+                            this.protocol.process(nextMessage);
                             }
                         }
                 } finally {

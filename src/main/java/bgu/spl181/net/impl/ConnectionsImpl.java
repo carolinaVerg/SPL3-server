@@ -52,7 +52,7 @@ public class ConnectionsImpl<T> implements Connections<T> {
 	
 	public synchronized void addHandler(ConnectionHandler<T> Handler) {
 		if(!connectionMap.contains(Handler)) {
-			((BlockingConnectionHandler<T>) Handler).setConnectionId(connectionId.get());
+			Handler.setConnectionId(connectionId.get());
 			connectionMap.put(connectionId.getAndIncrement(), Handler);
 		}
 		
