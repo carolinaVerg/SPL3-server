@@ -49,7 +49,7 @@ public  class UsersDataBase implements Serializable {
 	}
 	
 	public void addLogin(String UserName, String Password) {
-		LoginMap.putIfAbsent(UserName, Password);
+		LoginMap.put(UserName, Password);
 		
 	}
 	
