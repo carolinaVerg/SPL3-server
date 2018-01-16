@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.junit.experimental.theories.Theories;
 
@@ -18,6 +19,7 @@ public  class UsersDataBase implements Serializable {
 	private static ConcurrentHashMap<String, String> RegisterMap;
 	private transient ConcurrentHashMap<String, String> LoginMap;
 	private static ConcurrentHashMap<String, User> UsersMap;
+	private static ReentrantReadWriteLock lock;
 
 	//TODO: Fix sync between ArrayList and HashMap
 	
@@ -30,6 +32,7 @@ public  class UsersDataBase implements Serializable {
 		LoginMap= new ConcurrentHashMap<String, String>();	
 		UsersMap=new ConcurrentHashMap<String,User>();
 		users = new ArrayList<rentalMovieUser>();
+		lock = new ReentrantReadWriteLock();
 	}
 	
 	public void updateData() {
@@ -89,9 +92,14 @@ public  class UsersDataBase implements Serializable {
 	}
 	
 	private static boolean exists(User user) {
-		if(RegisterMap.containsKey(user.getUserName()))
+		if(RegisterMap.containsKey(user.getUserName())) {
 			return true;
+		}
 		return false;
+	}
+	
+	public ReentrantReadWriteLock getLock() {
+		return lock;
 	}
 	
 }

@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -19,6 +20,7 @@ public class MovieDataBase implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private static ConcurrentHashMap<String, Movie> MovieMap;
 	private static int highestId=0;
+	private static ReentrantReadWriteLock lock;
 	
 	@SerializedName("movies")
 	private ArrayList<Movie> movies;
@@ -27,6 +29,7 @@ public class MovieDataBase implements Serializable {
 	public MovieDataBase() {
 		this.movies=new ArrayList<>();
 		MovieMap= new ConcurrentHashMap<>();
+		lock = new ReentrantReadWriteLock();
 	}
 	
 	public void updateData() {
@@ -66,7 +69,6 @@ public class MovieDataBase implements Serializable {
 		if(newMovie.getId()==highestId)
 			highestId=newMovie.getId()+1;
 		
-		
 	}
 	
 	public synchronized void removeMovie(Movie movie) {
@@ -90,6 +92,10 @@ public class MovieDataBase implements Serializable {
 			listToReturn.add(movieName);
 		}
 		return listToReturn;
+	}
+	
+	public ReentrantReadWriteLock getLock() {
+		return this.lock;
 	}
 	
 }
