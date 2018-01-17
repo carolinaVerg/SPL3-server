@@ -140,7 +140,7 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 			case "SIGNOUT": {
 				this.usersLock.readLock().lock();
 				if (!this.isLogin.get()|| userDataBase.getLogin().get(user.getUserName())==null) {
-					this.ERROR((T) "signout");
+					this.ERROR((T) "signout failed");
 					this.usersLock.readLock().unlock();
 					return;
 				}
@@ -150,7 +150,7 @@ public abstract class UserServiceProtocol<T> implements BidiMessagingProtocol<T>
 				this.usersLock.writeLock().unlock();
 				this.user.setLogedIn(false);
 				this.ACK((T) ("signout" + " succeeded"));
-				this.connections.disconnect(connectionId);
+				//this.connections.disconnect(connectionId);
 				this.shouldTerminate.set(true);
 			}
 				break;
